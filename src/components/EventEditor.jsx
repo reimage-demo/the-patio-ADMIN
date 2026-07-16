@@ -96,7 +96,9 @@ export default function EventEditor({ event, onClose, onSave }) {
                     <input value={startTime} onChange={(e) => setStartTime(e.target.value)} placeholder="8:00 PM" required />
                   </label>
                   <label>
-                    End time <span className="optional-label">Optional</span>
+                    <span className="field-label">
+                      End time <small className="optional-label">Optional</small>
+                    </span>
                     <input value={endTime} onChange={(e) => setEndTime(e.target.value)} placeholder="11:00 PM" />
                   </label>
                 </div>

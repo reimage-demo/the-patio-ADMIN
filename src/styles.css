@@ -2218,3 +2218,180 @@ h3,
     min-height: 48px;
   }
 }
+
+/* Unified admin form controls — keep all editor fields on the same baseline. */
+:root {
+  --admin-control-height: 48px;
+  --admin-control-radius: 10px;
+  --admin-control-border: #d7ddd8;
+}
+
+.editor-dialog .form-two,
+.editor-dialog .form-three,
+.editor-dialog .event-time-grid,
+.editor-dialog .visibility-cards,
+.editor-dialog .rule-controls {
+  align-items: start;
+}
+
+.editor-dialog .form-two > label,
+.editor-dialog .form-three > label,
+.editor-dialog .event-time-grid > label,
+.editor-dialog .visibility-cards > label,
+.editor-dialog .rule-controls > label {
+  align-self: start;
+  align-content: start;
+  grid-auto-rows: max-content;
+  width: 100%;
+  margin: 0;
+}
+
+.editor-dialog input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.editor-dialog select,
+.status-select,
+.login-card input {
+  width: 100%;
+  height: var(--admin-control-height);
+  min-height: var(--admin-control-height);
+  padding: 0 14px;
+  border: 1px solid var(--admin-control-border);
+  border-radius: var(--admin-control-radius);
+  color: var(--ink);
+  background-color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: normal;
+}
+
+.editor-dialog input[type="date"],
+.editor-dialog input[type="time"] {
+  min-width: 0;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.editor-dialog input[type="date"]::-webkit-date-and-time-value,
+.editor-dialog input[type="time"]::-webkit-date-and-time-value {
+  min-height: 0;
+  margin: 0;
+  text-align: left;
+}
+
+.editor-dialog textarea {
+  width: 100%;
+  min-height: 96px;
+  padding: 13px 14px;
+  border: 1px solid var(--admin-control-border);
+  border-radius: var(--admin-control-radius);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.45;
+  resize: vertical;
+}
+
+.editor-dialog input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+.editor-dialog textarea:focus,
+.editor-dialog select:focus,
+.status-select:focus {
+  border-color: var(--green);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(16, 156, 80, 0.1);
+}
+
+.editor-dialog select,
+.status-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 42px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 18 18'%3E%3Cpath d='m5 7 4 4 4-4' fill='none' stroke='%2317211a' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 13px center;
+  background-size: 18px;
+}
+
+.field-label {
+  min-height: 17px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.optional-label {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 500;
+  line-height: inherit;
+}
+
+.editor-dialog .hint,
+.editor-dialog .field-count {
+  min-height: 14px;
+  line-height: 1.45;
+}
+
+.visibility-cards {
+  grid-auto-rows: 76px;
+}
+
+.visibility-cards .switch-label,
+.publish-switch {
+  width: 100%;
+  height: 76px;
+  min-height: 76px;
+  margin: 0;
+  padding: 13px 14px;
+  border: 1px solid var(--admin-control-border);
+  border-radius: var(--admin-control-radius);
+  background: #fafbf9;
+}
+
+.visibility-cards .switch-label > span:first-child,
+.publish-switch > span:first-child {
+  padding-right: 14px;
+}
+
+.switch {
+  width: 44px;
+  height: 26px;
+  flex: 0 0 44px;
+}
+
+.switch::after {
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+}
+
+.switch-label input:checked + .switch::after {
+  transform: translateX(18px);
+}
+
+.rule-controls > .switch-label {
+  height: 64px;
+  min-height: 64px;
+  padding: 10px 12px;
+}
+
+.option-price-input input {
+  padding-left: 30px !important;
+}
+
+@media (max-width: 760px) {
+  .editor-dialog .form-two,
+  .editor-dialog .form-three,
+  .editor-dialog .event-time-grid,
+  .editor-dialog .visibility-cards,
+  .editor-dialog .rule-controls {
+    gap: 14px;
+  }
+
+  .editor-dialog input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  .editor-dialog select,
+  .status-select,
+  .login-card input {
+    font-size: 16px;
+  }
+}
