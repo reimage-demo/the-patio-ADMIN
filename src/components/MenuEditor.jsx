@@ -1,42 +1,66 @@
 import { useState } from "react";
 
-export default function MenuEditor({ item, count, onClose, onSave }) {
-  const [error, setError] = useState(""),
-    [busy, setBusy] = useState(false),
-    [preview, setPreview] = useState(item?.imageUrl || "");
-  async function submit(e) {
-    e.preventDefault();
+const money = (value) =>
+  new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(Number(value || 0));
+
+export default function MenuEditor({
+  item,
+  count,
+  optionGroups,
+  onClose,
+  onSave,
+}) {
+  const isEditing = Boolean(item?._id);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [preview, setPreview] = useState(item?.imageUrl || "");
+  const [name, setName] = useState(item?.name || "");
+  const [category, setCategory] = useState(item?.category || "");
+  const [description, setDescription] = useState(item?.description || "");
+  const [price, setPrice] = useState(
+    item ? (item.price / 100).toFixed(2) : "",
+  );
+  const [available, setAvailable] = useState(item?.isAvailable ?? true);
+  const [featured, setFeatured] = useState(item?.isFeatured ?? false);
+  const [drinkOfNight, setDrinkOfNight] = useState(
+    item?.isDrinkOfNight ?? false,
+  );
+  const [customDrink, setCustomDrink] = useState(item?.isCustomDrink ?? false);
+  const [selectedGroups, setSelectedGroups] = useState(
+    item?.optionGroupIds || [],
+  );
+
+  async function submit(event) {
+    event.preventDefault();
     setBusy(true);
     setError("");
-    const f = e.currentTarget,
-      d = new FormData(f);
-    const addOns = String(d.get("addOns"))
-      .split("\n")
-      .map((x) => x.trim())
-      .filter(Boolean)
-      .map((line) => {
-        const [name, price = "0"] = line.split("|");
-        return {
-          name: name.trim(),
-          price: Math.round(Number(price.trim()) * 100),
-          isAvailable: true,
-        };
-      });
+    const data = new FormData(event.currentTarget);
     try {
+      if (customDrink && !selectedGroups.length)
+        throw new Error(
+          "Attach at least one pricing group to a Build Your Own drink.",
+        );
       await onSave({
         id: item?._id,
-        file: d.get("image"),
+        file: data.get("image"),
         imageUrl: item?.imageUrl,
         imageStorageId: item?.imageStorageId,
-        removeImage: d.get("removeImage") === "on",
-        name: d.get("name").trim(),
-        category: d.get("category").trim(),
-        description: d.get("description").trim(),
-        price: Math.round(Number(d.get("price")) * 100),
-        accent: d.get("accent").trim() || undefined,
-        isAvailable: d.get("isAvailable") === "on",
-        sortOrder: Number(d.get("sortOrder")),
-        addOns,
+        removeImage: data.get("removeImage") === "on",
+        name: name.trim(),
+        category: category.trim(),
+        description: description.trim(),
+        price: Math.round(Number(price) * 100),
+        accent: data.get("accent").trim() || undefined,
+        isAvailable: available,
+        isFeatured: featured,
+        isDrinkOfNight: drinkOfNight,
+        isCustomDrink: customDrink,
+        optionGroupIds: selectedGroups,
+        sortOrder: Number(data.get("sortOrder")),
+        addOns: item?.addOns || [],
       });
     } catch (err) {
       setError(
@@ -46,124 +70,207 @@ export default function MenuEditor({ item, count, onClose, onSave }) {
       setBusy(false);
     }
   }
-  function chooseImage(e) {
-    const file = e.target.files?.[0];
+
+  function chooseImage(event) {
+    const file = event.target.files?.[0];
     if (file) setPreview(URL.createObjectURL(file));
   }
+
+  function toggleGroup(groupId) {
+    setSelectedGroups((current) =>
+      current.includes(groupId)
+        ? current.filter((id) => id !== groupId)
+        : [...current, groupId],
+    );
+  }
+
   return (
     <div className="modal-backdrop">
-      <dialog className="editor-dialog" open>
-        <button className="dialog-close" onClick={onClose}>
+      <dialog className="editor-dialog menu-editor guided-editor" open>
+        <button className="dialog-close" onClick={onClose} aria-label="Close">
           ×
         </button>
-        <p className="eyebrow dark">Menu editor</p>
-        <h2>{item ? "Edit" : "Add"} menu item</h2>
+        <header className="editor-heading">
+          <p className="eyebrow dark">Menu editor</p>
+          <h2>{isEditing ? "Edit drink" : "Add a drink"}</h2>
+          <p>Everything customers need to decide, customize and order.</p>
+        </header>
+
         <form onSubmit={submit}>
-          <div className="menu-image-field">
-            <div className={`menu-image-preview ${preview ? "has-image" : ""}`}>
-              {preview ? (
-                <img src={preview} alt="Menu item preview" />
-              ) : (
-                <span>Add a bright, clear drink photo</span>
-              )}
-            </div>
-            <div>
-              <label>
-                Drink photo
-                <input
-                  name="image"
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
-                  onChange={chooseImage}
-                />
-                <span className="hint">
-                  Automatically resized and converted to a lightweight WebP
-                  before upload.
-                </span>
-              </label>
-              {item?.imageUrl && (
-                <label className="remove-image">
-                  <input name="removeImage" type="checkbox" /> Remove current
-                  photo
+          <div className="guided-editor-layout">
+            <div className="guided-editor-main">
+              <section className="editor-section">
+                <div className="editor-section-title">
+                  <b>1</b><span><strong>Drink details</strong><small>Use a short name and a clear ingredient description.</small></span>
+                </div>
+                <div className="form-two">
+                  <label>
+                    Drink name
+                    <input
+                      value={name}
+                      onChange={(event) => setName(event.target.value)}
+                      placeholder="Passion Fruit Margarita"
+                      required
+                    />
+                  </label>
+                  <label>
+                    Category
+                    <input
+                      value={category}
+                      onChange={(event) => setCategory(event.target.value)}
+                      placeholder="House Favorites"
+                      required
+                    />
+                  </label>
+                </div>
+                <label>
+                  Ingredients / what it contains
+                  <textarea
+                    rows="3"
+                    value={description}
+                    onChange={(event) => setDescription(event.target.value)}
+                    placeholder="Tequila, passion fruit, fresh lime and agave."
+                    required
+                  />
+                  <span className="field-count">{description.length}/180 recommended characters</span>
                 </label>
-              )}
+                <div className="form-two">
+                  <label>
+                    Base price ($)
+                    <input
+                      type="number"
+                      min="0"
+                      step=".01"
+                      value={price}
+                      onChange={(event) => setPrice(event.target.value)}
+                      required
+                    />
+                    <span className="hint">For custom drinks, the menu says “Starting at.”</span>
+                  </label>
+                  <label>
+                    Short internal tag
+                    <input name="accent" defaultValue={item?.accent} placeholder="Tropical" />
+                  </label>
+                </div>
+              </section>
+
+              <section className="editor-section">
+                <div className="editor-section-title">
+                  <b>2</b><span><strong>Add the photo</strong><small>It is automatically resized and converted to WebP.</small></span>
+                </div>
+                <div className="menu-image-field improved-image-field">
+                  <div className={`menu-image-preview ${preview ? "has-image" : ""}`}>
+                    {preview ? (
+                      <img src={preview} alt="Drink preview" />
+                    ) : (
+                      <span>Add a bright, clear drink photo</span>
+                    )}
+                  </div>
+                  <div>
+                    <label className="file-button-label">
+                      Choose photo
+                      <input
+                        name="image"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+                        onChange={chooseImage}
+                      />
+                    </label>
+                    <span className="hint">JPG, PNG, WebP or HEIC. Large files are optimized before upload.</span>
+                    {isEditing && item?.imageUrl && (
+                      <label className="remove-image">
+                        <input name="removeImage" type="checkbox" /> Remove current photo
+                      </label>
+                    )}
+                  </div>
+                </div>
+              </section>
+
+              <section className="editor-section">
+                <div className="editor-section-title">
+                  <b>3</b><span><strong>Choose where it appears</strong><small>These settings update the customer menu immediately.</small></span>
+                </div>
+                <div className="menu-visibility-options visibility-cards">
+                  <label className="switch-label">
+                    <span><strong>Available now</strong><small>Customers can order it</small></span>
+                    <input type="checkbox" checked={available} onChange={(event) => setAvailable(event.target.checked)} />
+                    <span className="switch" />
+                  </label>
+                  <label className="switch-label">
+                    <span><strong>Featured</strong><small>Move it near the beginning</small></span>
+                    <input type="checkbox" checked={featured} onChange={(event) => setFeatured(event.target.checked)} />
+                    <span className="switch" />
+                  </label>
+                  <label className="switch-label">
+                    <span><strong>Drink of the Night</strong><small>Highlights it above featured drinks</small></span>
+                    <input type="checkbox" checked={drinkOfNight} onChange={(event) => setDrinkOfNight(event.target.checked)} />
+                    <span className="switch" />
+                  </label>
+                  <label className="switch-label">
+                    <span><strong>Build Your Own</strong><small>Shows “Starting at” and opens choices</small></span>
+                    <input type="checkbox" checked={customDrink} onChange={(event) => setCustomDrink(event.target.checked)} />
+                    <span className="switch" />
+                  </label>
+                </div>
+                <label className="sort-order-field">
+                  Display order
+                  <input name="sortOrder" type="number" min="0" defaultValue={item?.sortOrder ?? count + 1} required />
+                  <span className="hint">Lower numbers appear first within the same priority level.</span>
+                </label>
+              </section>
+
+              <section className="editor-section">
+                <div className="editor-section-title">
+                  <b>4</b><span><strong>Attach customization</strong><small>Customers see these questions after tapping the plus button.</small></span>
+                </div>
+                {optionGroups.length ? (
+                  <div className="option-group-picker improved-group-picker">
+                    {optionGroups.map((group) => {
+                      const selected = selectedGroups.includes(group._id);
+                      return (
+                        <label key={group._id} className={selected ? "selected" : ""}>
+                          <input type="checkbox" checked={selected} onChange={() => toggleGroup(group._id)} />
+                          <span>
+                            <strong>{group.name}</strong>
+                            <small>{group.minSelections ? "Required" : "Optional"} · {group.selectionMode === "single" ? "Choose one" : `Up to ${group.maxSelections}`} · {group.options.length} choices</small>
+                          </span>
+                          <b>{selected ? "Attached" : "Attach"}</b>
+                        </label>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="inline-empty">Create choices under Pricing & Options, then return here to attach them.</div>
+                )}
+              </section>
             </div>
+
+            <aside className="editor-summary menu-summary">
+              <p className="summary-label">Customer preview</p>
+              <div className="summary-image">
+                {preview ? <img src={preview} alt="" /> : <span>Photo preview</span>}
+              </div>
+              <span className="summary-category">{category || "Category"}</span>
+              <h3>{name || "Drink name"}</h3>
+              <strong className="summary-price">
+                {customDrink ? "Starting at " : ""}{money(price)}
+              </strong>
+              <p>{description || "The drink description appears here."}</p>
+              <div className="summary-badges">
+                {drinkOfNight && <span>Drink of the Night</span>}
+                {!drinkOfNight && featured && <span>Featured</span>}
+                {customDrink && <span>Build Your Own</span>}
+                {!available && <span>Hidden</span>}
+              </div>
+              <small>{selectedGroups.length} customization group{selectedGroups.length === 1 ? "" : "s"} attached</small>
+            </aside>
           </div>
-          <div className="form-two">
-            <label>
-              Drink name
-              <input name="name" defaultValue={item?.name} required />
-            </label>
-            <label>
-              Category
-              <input name="category" defaultValue={item?.category} required />
-            </label>
-          </div>
-          <label>
-            Ingredients / what it contains
-            <textarea
-              name="description"
-              rows="3"
-              defaultValue={item?.description}
-              required
-            />
-          </label>
-          <div className="form-two">
-            <label>
-              Price ($)
-              <input
-                name="price"
-                type="number"
-                min="0"
-                step=".01"
-                defaultValue={item ? (item.price / 100).toFixed(2) : ""}
-                required
-              />
-            </label>
-            <label>
-              Short internal tag
-              <input name="accent" defaultValue={item?.accent} />
-            </label>
-          </div>
-          <div className="form-two">
-            <label>
-              Sort order
-              <input
-                name="sortOrder"
-                type="number"
-                min="0"
-                defaultValue={item?.sortOrder ?? count + 1}
-                required
-              />
-            </label>
-            <label className="switch-label">
-              Available now
-              <input
-                name="isAvailable"
-                type="checkbox"
-                defaultChecked={item?.isAvailable ?? true}
-              />
-              <span className="switch" />
-            </label>
-          </div>
-          <label>
-            Add-ons <span className="hint">One per line: Name | Price</span>
-            <textarea
-              name="addOns"
-              rows="4"
-              defaultValue={(item?.addOns || [])
-                .map((a) => `${a.name} | ${(a.price / 100).toFixed(2)}`)
-                .join("\n")}
-            />
-          </label>
+
           <p className="form-message">{error}</p>
-          <button className="primary-button" disabled={busy}>
-            {busy ? (
-              "Optimizing & saving…"
-            ) : (
-              "Save menu item"
-            )}
-          </button>
+          <div className="editor-actions">
+            <button type="button" className="secondary-button" onClick={onClose}>Cancel</button>
+            <button className="primary-button" disabled={busy}>{busy ? "Optimizing & saving…" : "Save menu item"}</button>
+          </div>
         </form>
       </dialog>
     </div>

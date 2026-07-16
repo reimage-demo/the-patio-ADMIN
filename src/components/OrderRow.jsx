@@ -17,6 +17,8 @@ const statuses = [
 ];
 const statusLabel = (value) =>
   value === "refunded" ? "refunded (after Clover)" : value.replace("-", " ");
+const itemLabel = (item) =>
+  `${item.quantity}× ${item.name}${item.selectedAddOns?.length ? ` — ${item.selectedAddOns.map((option) => option.name).join(", ")}` : ""}`;
 export default function OrderRow({ order, compact, onStatus, onPaid }) {
   return (
     <article className="order-row">
@@ -30,11 +32,7 @@ export default function OrderRow({ order, compact, onStatus, onPaid }) {
         </p>
       </div>
       <div className="order-items">
-        <strong>
-          {order.items
-            .map((item) => `${item.quantity}× ${item.name}`)
-            .join(", ")}
-        </strong>
+        <strong>{order.items.map(itemLabel).join(" | ")}</strong>
         <p>{order.notes || "No special notes"}</p>
       </div>
       <div className="order-meta">

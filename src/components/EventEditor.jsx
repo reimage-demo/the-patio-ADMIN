@@ -1,14 +1,33 @@
 import { useState } from "react";
 
+const formatPreviewDate = (value) => {
+  if (!value) return "Event date";
+  return new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(`${value}T12:00:00Z`));
+};
+
 export default function EventEditor({ event, onClose, onSave }) {
-  const [error, setError] = useState(""),
-    [busy, setBusy] = useState(false);
-  async function submit(e) {
-    e.preventDefault();
+  const isEditing = Boolean(event?._id);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [preview, setPreview] = useState(event?.imageUrl || "");
+  const [title, setTitle] = useState(event?.title || "");
+  const [date, setDate] = useState(event?.date || "");
+  const [startTime, setStartTime] = useState(event?.startTime || "");
+  const [endTime, setEndTime] = useState(event?.endTime || "");
+  const [description, setDescription] = useState(event?.description || "");
+  const [published, setPublished] = useState(event?.isPublished ?? true);
+
+  async function submit(submitEvent) {
+    submitEvent.preventDefault();
     setBusy(true);
     setError("");
-    const d = new FormData(e.currentTarget),
-      file = d.get("image");
+    const data = new FormData(submitEvent.currentTarget);
+    const file = data.get("image");
     try {
       if (
         file?.size &&
@@ -19,15 +38,16 @@ export default function EventEditor({ event, onClose, onSave }) {
         throw new Error("Event images must be 10 MB or smaller.");
       await onSave({
         id: event?._id,
-        title: d.get("title").trim(),
-        date: d.get("date"),
-        startTime: d.get("startTime").trim(),
-        endTime: d.get("endTime").trim() || undefined,
-        description: d.get("description").trim(),
-        isPublished: d.get("isPublished") === "on",
+        title: title.trim(),
+        date,
+        startTime: startTime.trim(),
+        endTime: endTime.trim() || undefined,
+        description: description.trim(),
+        isPublished: published,
         file,
         imageUrl: event?.imageUrl,
         imageStorageId: event?.imageStorageId,
+        removeImage: data.get("removeImage") === "on",
       });
     } catch (err) {
       setError(
@@ -37,76 +57,107 @@ export default function EventEditor({ event, onClose, onSave }) {
       setBusy(false);
     }
   }
+
+  function chooseImage(changeEvent) {
+    const file = changeEvent.target.files?.[0];
+    if (file) setPreview(URL.createObjectURL(file));
+  }
+
   return (
     <div className="modal-backdrop">
-      <dialog className="editor-dialog" open>
-        <button className="dialog-close" onClick={onClose}>
+      <dialog className="editor-dialog event-editor guided-editor" open>
+        <button className="dialog-close" onClick={onClose} aria-label="Close">
           ×
         </button>
-        <p className="eyebrow dark">Event editor</p>
-        <h2>{event ? "Edit" : "Add"} event</h2>
+        <header className="editor-heading">
+          <p className="eyebrow dark">Event editor</p>
+          <h2>{isEditing ? "Edit event" : "Create an event"}</h2>
+          <p>Add the essentials once, preview them, and publish when ready.</p>
+        </header>
+
         <form onSubmit={submit}>
-          <label>
-            Event name
-            <input name="title" defaultValue={event?.title} required />
-          </label>
-          <div className="form-two">
-            <label>
-              Date
-              <input
-                name="date"
-                type="date"
-                defaultValue={event?.date}
-                required
-              />
-            </label>
-            <label>
-              Start time
-              <input
-                name="startTime"
-                defaultValue={event?.startTime}
-                required
-              />
-            </label>
+          <div className="guided-editor-layout">
+            <div className="guided-editor-main">
+              <section className="editor-section">
+                <div className="editor-section-title">
+                  <b>1</b><span><strong>Event details</strong><small>Use the same wording customers will see on the website.</small></span>
+                </div>
+                <label>
+                  Event name
+                  <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Friday Night Live" required />
+                </label>
+                <div className="form-three event-time-grid">
+                  <label>
+                    Date
+                    <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+                  </label>
+                  <label>
+                    Start time
+                    <input value={startTime} onChange={(e) => setStartTime(e.target.value)} placeholder="8:00 PM" required />
+                  </label>
+                  <label>
+                    End time <span className="optional-label">Optional</span>
+                    <input value={endTime} onChange={(e) => setEndTime(e.target.value)} placeholder="11:00 PM" />
+                  </label>
+                </div>
+                <label>
+                  Description
+                  <textarea rows="4" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Tell guests what is happening and why they should come." required />
+                  <span className="field-count">{description.length}/240 recommended characters</span>
+                </label>
+              </section>
+
+              <section className="editor-section">
+                <div className="editor-section-title">
+                  <b>2</b><span><strong>Event photo or flyer</strong><small>Automatically resized and converted to a lightweight WebP.</small></span>
+                </div>
+                <div className="menu-image-field improved-image-field">
+                  <div className={`menu-image-preview ${preview ? "has-image" : ""}`}>
+                    {preview ? <img src={preview} alt="Event preview" /> : <span>Add an event photo or flyer</span>}
+                  </div>
+                  <div>
+                    <label className="file-button-label">
+                      Choose image
+                      <input name="image" type="file" accept="image/png,image/jpeg,image/webp" onChange={chooseImage} />
+                    </label>
+                    <span className="hint">JPG, PNG or WebP, up to 10 MB.</span>
+                    {isEditing && event?.imageUrl && (
+                      <label className="remove-image"><input name="removeImage" type="checkbox" /> Remove current photo</label>
+                    )}
+                  </div>
+                </div>
+              </section>
+
+              <section className="editor-section publish-section">
+                <div className="editor-section-title">
+                  <b>3</b><span><strong>Publish</strong><small>Draft events stay in the admin portal but remain hidden from customers.</small></span>
+                </div>
+                <label className="switch-label publish-switch">
+                  <span><strong>{published ? "Published on website" : "Saved as a draft"}</strong><small>{published ? "Customers can see this event" : "Only admins can see this event"}</small></span>
+                  <input type="checkbox" checked={published} onChange={(e) => setPublished(e.target.checked)} />
+                  <span className="switch" />
+                </label>
+              </section>
+            </div>
+
+            <aside className="editor-summary event-summary">
+              <p className="summary-label">Website preview</p>
+              <div className="summary-image event-summary-image">
+                {preview ? <img src={preview} alt="" /> : <span>Event image</span>}
+              </div>
+              <span className="summary-category">{published ? "Published" : "Draft"}</span>
+              <h3>{title || "Event name"}</h3>
+              <strong>{formatPreviewDate(date)}</strong>
+              <p className="summary-time">{startTime || "Start time"}{endTime ? ` – ${endTime}` : ""}</p>
+              <p>{description || "The event description appears here."}</p>
+            </aside>
           </div>
-          <label>
-            End time
-            <input name="endTime" defaultValue={event?.endTime} />
-          </label>
-          <label>
-            Description
-            <textarea
-              name="description"
-              rows="4"
-              defaultValue={event?.description}
-              required
-            />
-          </label>
-          <label>
-            Flyer or event image
-            <input
-              name="image"
-              type="file"
-              accept="image/png,image/jpeg,image/webp"
-            />
-            <span className="hint">
-              JPG, PNG or WebP, up to 10 MB. Large images are resized and
-              converted to WebP before upload.
-            </span>
-          </label>
-          <label className="switch-label">
-            Published on website
-            <input
-              name="isPublished"
-              type="checkbox"
-              defaultChecked={event?.isPublished ?? true}
-            />
-            <span className="switch" />
-          </label>
+
           <p className="form-message">{error}</p>
-          <button className="primary-button" disabled={busy}>
-            {busy ? "Saving…" : "Save event"}
-          </button>
+          <div className="editor-actions">
+            <button type="button" className="secondary-button" onClick={onClose}>Cancel</button>
+            <button className="primary-button" disabled={busy}>{busy ? "Saving…" : published ? "Save and publish" : "Save draft"}</button>
+          </div>
         </form>
       </dialog>
     </div>

@@ -1,10 +1,12 @@
 import logo from "../logo.webp";
+import Icon from "./Icons";
 
 const tabs = [
-  ["overview", "⌂", "Overview"],
-  ["orders", "◉", "Orders"],
-  ["menu", "☷", "Menu"],
-  ["events", "◇", "Events"],
+  ["overview", "Overview"],
+  ["orders", "Orders"],
+  ["menu", "Menu"],
+  ["pricing", "Pricing & Options"],
+  ["events", "Events"],
 ];
 export default function Sidebar({
   active,
@@ -12,30 +14,61 @@ export default function Sidebar({
   orderCount,
   open,
   onLogout,
+  collapsed,
+  onCollapse,
 }) {
   return (
     <aside className={`sidebar ${open ? "open" : ""}`}>
-      <a className="admin-brand" href="../index.html">
-        <img src={logo} alt="The Patio" />
-      </a>
+      <div className="sidebar-brand-block">
+        <a
+          className="admin-brand"
+          href="../index.html"
+          aria-label="The Patio website"
+        >
+          <img src={logo} alt="The Patio" />
+        </a>
+      </div>
+      <div className="sidebar-collapse-row">
+        <button
+          className="sidebar-collapse"
+          type="button"
+          onClick={onCollapse}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          <Icon name={collapsed ? "expand" : "collapse"} />
+          <span>{collapsed ? "Expand" : "Collapse"}</span>
+        </button>
+      </div>
       <nav>
-        {tabs.map(([id, icon, label]) => (
+        {tabs.map(([id, label]) => (
           <button
             key={id}
             className={`tab ${active === id ? "active" : ""}`}
             onClick={() => setActive(id)}
+            aria-current={active === id ? "page" : undefined}
+            title={collapsed ? label : undefined}
           >
-            <span>{icon}</span>
-            {label}
+            <Icon name={id} />
+            <span className="nav-label">{label}</span>
             {id === "orders" && <b>{orderCount}</b>}
           </button>
         ))}
       </nav>
       <div className="sidebar-bottom">
-        <a href="../index.html" target="_blank">
-          View website
+        <a
+          href="../index.html"
+          target="_blank"
+          rel="noreferrer"
+          title={collapsed ? "View website" : undefined}
+        >
+          <Icon name="external" />
+          <span className="sidebar-bottom-label">View website</span>
         </a>
-        <button onClick={onLogout}>Sign out</button>
+        <button onClick={onLogout} title={collapsed ? "Sign out" : undefined}>
+          <Icon name="logout" />
+          <span className="sidebar-bottom-label">Sign out</span>
+        </button>
       </div>
     </aside>
   );
