@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import OrderRow from "./OrderRow";
 export default function OrdersView({
   orders,
@@ -6,8 +6,13 @@ export default function OrdersView({
   loadMore,
   onStatus,
   onPaid,
+  onDelete,
+  onDeleteMany,
+  onClearFinished,
 }) {
   const [filter, setFilter] = useState("active");
+  const [selected, setSelected] = useState(() => new Set());
+  const loadedOrderIds = orders.map((order) => order._id).join("|");
   let rows = orders;
   if (filter === "active")
     rows = orders.filter((o) =>
@@ -17,6 +22,34 @@ export default function OrdersView({
     rows = orders.filter((o) =>
       ["completed", "cancelled", "refunded"].includes(o.status),
     );
+  useEffect(() => {
+    const loadedIds = new Set(orders.map((order) => order._id));
+    setSelected(
+      (current) => new Set([...current].filter((id) => loadedIds.has(id))),
+    );
+  }, [loadedOrderIds]);
+  const allVisibleSelected =
+    rows.length > 0 && rows.every((order) => selected.has(order._id));
+  function toggleAllVisible() {
+    setSelected((current) => {
+      const next = new Set(current);
+      if (allVisibleSelected)
+        rows.forEach((order) => next.delete(order._id));
+      else rows.forEach((order) => next.add(order._id));
+      return next;
+    });
+  }
+  function toggleOrder(id, checked) {
+    setSelected((current) => {
+      const next = new Set(current);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  }
+  async function deleteSelected() {
+    if (await onDeleteMany([...selected])) setSelected(new Set());
+  }
   return (
     <>
       <div className="view-tools">
@@ -25,7 +58,10 @@ export default function OrdersView({
             <button
               key={value}
               className={`filter ${filter === value ? "active" : ""}`}
-              onClick={() => setFilter(value)}
+              onClick={() => {
+                setFilter(value);
+                setSelected(new Set());
+              }}
             >
               {value === "all"
                 ? "All orders"
@@ -33,6 +69,28 @@ export default function OrdersView({
             </button>
           ))}
         </div>
+        <button className="danger-button compact" onClick={onClearFinished}>
+          Clear finished orders
+        </button>
+      </div>
+      <div className="bulk-order-tools">
+        <label className="bulk-select">
+          <input
+            type="checkbox"
+            checked={allVisibleSelected}
+            onChange={toggleAllVisible}
+            disabled={!rows.length}
+          />
+          Select all
+        </label>
+        <span>{selected.size} selected</span>
+        <button
+          className="danger-button compact"
+          disabled={!selected.size}
+          onClick={deleteSelected}
+        >
+          Delete selected
+        </button>
       </div>
       <div className="orders-list">
         {rows.length ? (
@@ -42,6 +100,9 @@ export default function OrdersView({
               order={o}
               onStatus={onStatus}
               onPaid={onPaid}
+              onDelete={onDelete}
+              selected={selected.has(o._id)}
+              onSelect={toggleOrder}
             />
           ))
         ) : (

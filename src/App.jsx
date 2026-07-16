@@ -70,6 +70,9 @@ export default function App() {
   const generateUploadUrl = useMutation(api.events.generateUploadUrl);
   const updateOrderStatus = useMutation(api.orders.updateStatus);
   const updateOrderPaid = useMutation(api.orders.updatePaid);
+  const removeOrder = useMutation(api.orders.remove);
+  const removeOrders = useMutation(api.orders.removeMany);
+  const clearFinishedOrders = useMutation(api.orders.clearFinished);
   const createOptionGroup = useMutation(api.optionGroups.create);
   const updateOptionGroup = useMutation(api.optionGroups.update);
   const removeOptionGroup = useMutation(api.optionGroups.remove);
@@ -100,6 +103,44 @@ export default function App() {
       await updateOrderStatus({ sessionToken: token, id, status: value });
     else await updateOrderPaid({ sessionToken: token, id, paid: value });
     notify("Order updated");
+  }
+  async function deleteOrder(id) {
+    if (
+      !confirm(
+        "Permanently delete this order? Deleted orders are removed from revenue totals and cannot be restored.",
+      )
+    )
+      return;
+    await removeOrder({ sessionToken: token, id });
+    notify("Order deleted");
+  }
+  async function clearOrders() {
+    if (
+      !confirm(
+        "Clear every completed, cancelled, and refunded order from the admin list? Revenue history will be preserved.",
+      )
+    )
+      return;
+    const result = await clearFinishedOrders({ sessionToken: token });
+    notify(
+      result.cleared
+        ? `${result.cleared} finished order${result.cleared === 1 ? "" : "s"} cleared`
+        : "No finished orders to clear",
+    );
+  }
+  async function deleteOrders(ids) {
+    if (!ids.length) return false;
+    if (
+      !confirm(
+        `Permanently delete ${ids.length} selected order${ids.length === 1 ? "" : "s"}? Deleted orders are removed from revenue totals and cannot be restored.`,
+      )
+    )
+      return false;
+    const result = await removeOrders({ sessionToken: token, ids });
+    notify(
+      `${result.deleted} order${result.deleted === 1 ? "" : "s"} deleted`,
+    );
+    return true;
   }
   async function saveMenu(data) {
     let { id, file, imageStorageId, imageUrl, removeImage, ...values } = data;
@@ -229,6 +270,9 @@ export default function App() {
                 loadMore={() => orderPages.loadMore(50)}
                 onStatus={(id, value) => updateOrder(id, "status", value)}
                 onPaid={(id, value) => updateOrder(id, "paid", value)}
+                onDelete={deleteOrder}
+                onDeleteMany={deleteOrders}
+                onClearFinished={clearOrders}
               />
             )}
             {view === "menu" && (

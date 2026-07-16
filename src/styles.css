@@ -377,7 +377,7 @@ textarea:focus {
 .stats-grid {
   margin: 18px 0;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 14px;
 }
 .stats-grid article {
@@ -461,10 +461,44 @@ textarea:focus {
   display: grid;
   gap: 12px;
 }
+.bulk-order-tools {
+  margin: -8px 0 16px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+}
+.bulk-order-tools > span {
+  margin-right: auto;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+.bulk-select,
+.order-select {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  font-weight: 700;
+}
+.bulk-select input,
+.order-select input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--green);
+}
+.order-select {
+  margin-bottom: 8px;
+  color: var(--muted);
+}
 .order-row {
   padding: 20px;
   display: grid;
-  grid-template-columns: 1.2fr 1.4fr 0.7fr 0.7fr;
+  grid-template-columns: 1.2fr 1.4fr 0.7fr 1.1fr;
   gap: 20px;
   align-items: center;
   border: 1px solid var(--line);
@@ -508,6 +542,41 @@ textarea:focus {
 }
 .paid-toggle input {
   width: auto;
+}
+.order-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  align-items: center;
+}
+.order-actions button,
+.danger-button {
+  min-height: 38px;
+  padding: 8px 11px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #fff;
+  font-size: 10px;
+  font-weight: 700;
+}
+.complete-order-button {
+  color: #fff;
+  border-color: var(--green) !important;
+  background: var(--green) !important;
+}
+.delete-order-button,
+.danger-button {
+  color: var(--red);
+  border-color: rgba(170, 40, 40, 0.24);
+}
+.danger-button.compact {
+  min-height: 42px;
+  padding: 9px 15px;
+  flex: none;
+}
+.danger-button:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
 }
 .admin-grid {
   display: grid;
@@ -2393,5 +2462,18 @@ h3,
   .status-select,
   .login-card input {
     font-size: 16px;
+  }
+
+  .bulk-order-tools {
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+  .bulk-order-tools > span {
+    margin-right: 0;
+    margin-left: auto;
+    align-self: center;
+  }
+  .bulk-order-tools .danger-button {
+    width: 100%;
   }
 }

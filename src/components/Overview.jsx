@@ -1,6 +1,21 @@
 import OrderRow from "./OrderRow";
+const moneyFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+});
+const money = (cents) => moneyFormatter.format((cents || 0) / 100);
 export default function Overview({ summary, go }) {
   const stats = [
+    [
+      "Revenue today",
+      money(summary?.todayRevenue),
+      "Paid orders · Hartford time",
+    ],
+    [
+      "Total revenue",
+      money(summary?.totalRevenue),
+      `${summary?.paidOrderCount ?? 0} paid orders`,
+    ],
     ["Active orders", summary?.activeCount ?? 0, "Received or in progress"],
     ["Ready for pickup", summary?.readyCount ?? 0, "Waiting for guests"],
     [

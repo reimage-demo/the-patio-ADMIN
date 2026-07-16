@@ -19,10 +19,28 @@ const statusLabel = (value) =>
   value === "refunded" ? "refunded (after Clover)" : value.replace("-", " ");
 const itemLabel = (item) =>
   `${item.quantity}× ${item.name}${item.selectedAddOns?.length ? ` — ${item.selectedAddOns.map((option) => option.name).join(", ")}` : ""}`;
-export default function OrderRow({ order, compact, onStatus, onPaid }) {
+export default function OrderRow({
+  order,
+  compact,
+  onStatus,
+  onPaid,
+  onDelete,
+  selected,
+  onSelect,
+}) {
   return (
     <article className="order-row">
       <div className="order-person">
+        {!compact && (
+          <label className="order-select">
+            <input
+              type="checkbox"
+              checked={selected}
+              onChange={(event) => onSelect(order._id, event.target.checked)}
+            />
+            Select order
+          </label>
+        )}
         <h3>
           {order.customerName} · {order.orderNumber}
         </h3>
@@ -55,7 +73,11 @@ export default function OrderRow({ order, compact, onStatus, onPaid }) {
             onChange={(e) => onStatus(order._id, e.target.value)}
           >
             {statuses.map((value) => (
-              <option key={value} value={value}>
+              <option
+                key={value}
+                value={value}
+                disabled={value === "received"}
+              >
                 {statusLabel(value)}
               </option>
             ))}
@@ -68,6 +90,20 @@ export default function OrderRow({ order, compact, onStatus, onPaid }) {
             />{" "}
             Paid
           </label>
+          {!["completed", "cancelled", "refunded"].includes(order.status) && (
+            <button
+              className="complete-order-button"
+              onClick={() => onStatus(order._id, "completed")}
+            >
+              Mark complete
+            </button>
+          )}
+          <button
+            className="delete-order-button"
+            onClick={() => onDelete(order._id)}
+          >
+            Delete
+          </button>
         </div>
       )}
     </article>
