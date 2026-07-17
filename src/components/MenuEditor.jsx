@@ -12,13 +12,16 @@ export default function MenuEditor({
   optionGroups,
   onClose,
   onSave,
+  bottleService = false,
 }) {
   const isEditing = Boolean(item?._id);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [preview, setPreview] = useState(item?.imageUrl || "");
   const [name, setName] = useState(item?.name || "");
-  const [category, setCategory] = useState(item?.category || "");
+  const [category, setCategory] = useState(
+    item?.category || (bottleService ? "Bottle Service" : ""),
+  );
   const [description, setDescription] = useState(item?.description || "");
   const [price, setPrice] = useState(
     item ? (item.price / 100).toFixed(2) : "",
@@ -28,7 +31,9 @@ export default function MenuEditor({
   const [drinkOfNight, setDrinkOfNight] = useState(
     item?.isDrinkOfNight ?? false,
   );
-  const [customDrink, setCustomDrink] = useState(item?.isCustomDrink ?? false);
+  const [customDrink, setCustomDrink] = useState(
+    item?.isCustomDrink ?? bottleService,
+  );
   const [selectedGroups, setSelectedGroups] = useState(
     item?.optionGroupIds || [],
   );
@@ -39,9 +44,11 @@ export default function MenuEditor({
     setError("");
     const data = new FormData(event.currentTarget);
     try {
-      if (customDrink && !selectedGroups.length)
+      if ((customDrink || bottleService) && !selectedGroups.length)
         throw new Error(
-          "Attach at least one pricing group to a Build Your Own drink.",
+          bottleService
+            ? "Attach at least one bottle, included-drink or chaser choice."
+            : "Attach at least one pricing group to a Build Your Own drink.",
         );
       await onSave({
         id: item?._id,
@@ -57,7 +64,8 @@ export default function MenuEditor({
         isAvailable: available,
         isFeatured: featured,
         isDrinkOfNight: drinkOfNight,
-        isCustomDrink: customDrink,
+        isCustomDrink: bottleService || customDrink,
+        isBottleService: bottleService,
         optionGroupIds: selectedGroups,
         sortOrder: Number(data.get("sortOrder")),
         addOns: item?.addOns || [],
@@ -91,9 +99,18 @@ export default function MenuEditor({
           ×
         </button>
         <header className="editor-heading">
-          <p className="eyebrow dark">Menu editor</p>
-          <h2>{isEditing ? "Edit drink" : "Add a drink"}</h2>
-          <p>Everything customers need to decide, customize and order.</p>
+          <p className="eyebrow dark">
+            {bottleService ? "Bottle service editor" : "Menu editor"}
+          </p>
+          <h2>
+            {isEditing ? "Edit" : "Add"}{" "}
+            {bottleService ? "a bottle package" : "a drink"}
+          </h2>
+          <p>
+            {bottleService
+              ? "Set the package price, then attach choices for bottles, included drinks and chasers."
+              : "Everything customers need to decide, customize and order."}
+          </p>
         </header>
 
         <form onSubmit={submit}>
@@ -105,7 +122,7 @@ export default function MenuEditor({
                 </div>
                 <div className="form-two">
                   <label>
-                    Drink name
+                    {bottleService ? "Package name" : "Drink name"}
                     <input
                       value={name}
                       onChange={(event) => setName(event.target.value)}
@@ -113,7 +130,7 @@ export default function MenuEditor({
                       required
                     />
                   </label>
-                  <label>
+                  {!bottleService && <label>
                     Category
                     <input
                       value={category}
@@ -121,7 +138,7 @@ export default function MenuEditor({
                       placeholder="House Favorites"
                       required
                     />
-                  </label>
+                  </label>}
                 </div>
                 <label>
                   Ingredients / what it contains
@@ -221,7 +238,7 @@ export default function MenuEditor({
 
               <section className="editor-section">
                 <div className="editor-section-title">
-                  <b>4</b><span><strong>Attach customization</strong><small>Customers see these questions after tapping the plus button.</small></span>
+                  <b>4</b><span><strong>{bottleService ? "Choose what can be included" : "Attach customization"}</strong><small>{bottleService ? "Attach choice groups for bottles, drinks and chasers." : "Customers see these questions after tapping the plus button."}</small></span>
                 </div>
                 {optionGroups.length ? (
                   <div className="option-group-picker improved-group-picker">
@@ -240,7 +257,7 @@ export default function MenuEditor({
                     })}
                   </div>
                 ) : (
-                  <div className="inline-empty">Create choices under Pricing & Options, then return here to attach them.</div>
+                  <div className="inline-empty">Create bottle, included-drink and chaser choices under Pricing & Options, then return here to attach them.</div>
                 )}
               </section>
             </div>
@@ -253,7 +270,7 @@ export default function MenuEditor({
               <span className="summary-category">{category || "Category"}</span>
               <h3>{name || "Drink name"}</h3>
               <strong className="summary-price">
-                {customDrink ? "Starting at " : ""}{money(price)}
+                {customDrink || bottleService ? "Starting at " : ""}{money(price)}
               </strong>
               <p>{description || "The drink description appears here."}</p>
               <div className="summary-badges">

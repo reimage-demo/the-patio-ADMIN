@@ -19,6 +19,12 @@ export default function Icon({ name, size = 20 }) {
         <path d="M7 3v7M4 3v4a3 3 0 0 0 6 0V3M7 10v11M16 3v18M16 3c3 2 4 6 0 9" />
       </>
     ),
+    "bottle-service": (
+      <>
+        <path d="M9 3h6M10 3v4l-3 4v8a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-8l-3-4V3" />
+        <path d="M7 13h10" />
+      </>
+    ),
     pricing: (
       <>
         <circle cx="12" cy="12" r="9" />

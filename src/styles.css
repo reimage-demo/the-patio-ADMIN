@@ -311,6 +311,53 @@ textarea:focus {
   font-size: 11px;
   font-weight: 700;
 }
+.admin-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.quick-links {
+  position: relative;
+}
+.quick-links summary {
+  padding: 10px 13px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 11px;
+  font-weight: 750;
+  cursor: pointer;
+  list-style: none;
+}
+.quick-links summary::-webkit-details-marker {
+  display: none;
+}
+.quick-links > div {
+  position: absolute;
+  z-index: 60;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 220px;
+  padding: 7px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgba(5, 21, 12, 0.16);
+}
+.quick-links a {
+  padding: 11px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 6px;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 650;
+  text-decoration: none;
+}
+.quick-links a:hover {
+  background: var(--cream);
+}
 .admin-user i {
   width: 40px;
   height: 40px;
@@ -797,6 +844,9 @@ textarea:focus {
   }
   .admin-user span {
     display: none;
+  }
+  .quick-links summary {
+    padding: 10px;
   }
   .admin-header {
     padding: 17px 20px;

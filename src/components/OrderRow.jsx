@@ -55,6 +55,11 @@ export default function OrderRow({
       </div>
       <div className="order-meta">
         <strong>{money(order.total)}</strong>
+        {order.tip > 0 && (
+          <span>
+            {money(order.subtotal)} subtotal + {money(order.tip)} tip
+          </span>
+        )}
         <span>{timeFormatter.format(new Date(order.createdAt))}</span>
         <span>
           {order.cloverPaymentId ? "Clover verified" : "Payment recorded"}

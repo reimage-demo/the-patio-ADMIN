@@ -5,6 +5,7 @@ const tabs = [
   ["overview", "Overview"],
   ["orders", "Orders"],
   ["menu", "Menu"],
+  ["bottle-service", "Bottle Service"],
   ["pricing", "Pricing & Options"],
   ["events", "Events"],
 ];

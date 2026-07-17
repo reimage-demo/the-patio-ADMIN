@@ -4,16 +4,17 @@ const money = (cents) =>
     currency: "USD",
   }).format(cents / 100);
 
-export default function MenuView({ items, onAdd, onEdit, onDuplicate, onDelete }) {
+export default function MenuView({ items, onAdd, onEdit, onDuplicate, onDelete, bottleService = false }) {
   return (
     <>
       <div className="view-tools">
         <p className="subtext">
-          Create drinks, upload optimized photos, update pricing and choose
-          featured drinks.
+          {bottleService
+            ? "Create bottle-service packages and attach bottle, included-drink and chaser choices."
+            : "Create drinks, upload optimized photos, update pricing and choose featured drinks."}
         </p>
         <button className="primary-button compact" onClick={onAdd}>
-          + Add menu item
+          + Add {bottleService ? "bottle package" : "menu item"}
         </button>
       </div>
       <div className="admin-grid menu-admin-grid">
@@ -65,7 +66,7 @@ export default function MenuView({ items, onAdd, onEdit, onDuplicate, onDelete }
             </article>
           ))
         ) : (
-          <div className="empty">No menu items yet.</div>
+          <div className="empty">No {bottleService ? "bottle-service packages" : "menu items"} yet.</div>
         )}
       </div>
     </>

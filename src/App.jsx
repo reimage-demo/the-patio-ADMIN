@@ -37,12 +37,18 @@ export default function App() {
   const menu =
     useQuery(
       api.menuItems.adminList,
-      token && view === "menu" ? { sessionToken: token } : "skip",
+      token && (view === "menu" || view === "bottle-service")
+        ? { sessionToken: token }
+        : "skip",
     ) || [];
   const optionGroups =
     useQuery(
       api.optionGroups.adminList,
-      token && (view === "menu" || view === "pricing" || menuEditor)
+      token &&
+      (view === "menu" ||
+        view === "bottle-service" ||
+        view === "pricing" ||
+        menuEditor)
         ? { sessionToken: token }
         : "skip",
     ) || [];
@@ -277,7 +283,7 @@ export default function App() {
             )}
             {view === "menu" && (
               <MenuView
-                items={menu}
+                items={menu.filter((item) => !item.isBottleService)}
                 onAdd={() => setMenuEditor({ mode: "new" })}
                 onEdit={setMenuEditor}
                 onDuplicate={(item) =>
@@ -287,7 +293,30 @@ export default function App() {
                     name: `${item.name} copy`,
                     imageUrl: undefined,
                     imageStorageId: undefined,
-                    sortOrder: menu.length + 1,
+                    sortOrder:
+                      menu.filter((row) => !row.isBottleService).length + 1,
+                  })
+                }
+                onDelete={deleteMenu}
+              />
+            )}
+            {view === "bottle-service" && (
+              <MenuView
+                bottleService
+                items={menu.filter((item) => item.isBottleService)}
+                onAdd={() =>
+                  setMenuEditor({ mode: "new", isBottleService: true })
+                }
+                onEdit={setMenuEditor}
+                onDuplicate={(item) =>
+                  setMenuEditor({
+                    ...item,
+                    _id: undefined,
+                    name: `${item.name} copy`,
+                    imageUrl: undefined,
+                    imageStorageId: undefined,
+                    sortOrder:
+                      menu.filter((row) => row.isBottleService).length + 1,
                   })
                 }
                 onDelete={deleteMenu}
@@ -339,6 +368,7 @@ export default function App() {
       {menuEditor && (
         <MenuEditor
           item={menuEditor.mode === "new" ? null : menuEditor}
+          bottleService={Boolean(menuEditor.isBottleService)}
           count={menu.length}
           optionGroups={optionGroups}
           onClose={() => setMenuEditor(null)}
