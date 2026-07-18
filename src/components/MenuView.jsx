@@ -4,14 +4,14 @@ const money = (cents) =>
     currency: "USD",
   }).format(cents / 100);
 
-export default function MenuView({ items, onAdd, onEdit, onDuplicate, onDelete, bottleService = false }) {
+export default function MenuView({ items, onAdd, onEdit, onDuplicate, onDelete, onVisibility, bottleService = false }) {
   return (
     <>
       <div className="view-tools">
         <p className="subtext">
           {bottleService
             ? "Create bottle-service packages and attach bottle, included-drink and chaser choices."
-            : "Create drinks, upload optimized photos, update pricing and choose featured drinks."}
+            : "Create drinks, upload photos, and hide test items without deleting them."}
         </p>
         <button className="primary-button compact" onClick={onAdd}>
           + Add {bottleService ? "bottle package" : "menu item"}
@@ -44,7 +44,7 @@ export default function MenuView({ items, onAdd, onEdit, onDuplicate, onDelete, 
                 <p>{item.description}</p>
                 <div className="admin-card-meta">
                   <span>{item.category}</span>
-                  <span>{item.isAvailable ? "Available" : "Unavailable"}</span>
+                  <span>{item.isAvailable ? "Visible on menu" : "Hidden from menu"}</span>
                   {item.isFeatured && (
                     <span className="admin-feature-tag">Featured</span>
                   )}
@@ -58,6 +58,9 @@ export default function MenuView({ items, onAdd, onEdit, onDuplicate, onDelete, 
                 <div className="card-actions">
                   <button onClick={() => onEdit(item)}>Edit</button>
                   <button onClick={() => onDuplicate(item)}>Duplicate</button>
+                  <button onClick={() => onVisibility(item, !item.isAvailable)}>
+                    {item.isAvailable ? "Hide from menu" : "Show on menu"}
+                  </button>
                   <button className="delete" onClick={() => onDelete(item._id)}>
                     Delete
                   </button>

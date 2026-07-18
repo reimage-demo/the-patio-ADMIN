@@ -4,6 +4,7 @@ import logo from '../logo.webp'
 export default function LoginView({ onLogin, connected }) {
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   async function submit(event) {
     event.preventDefault(); setBusy(true); setError('')
     const data = new FormData(event.currentTarget)
@@ -22,7 +23,26 @@ export default function LoginView({ onLogin, connected }) {
       <h1>Sign in</h1>
       <p className="login-intro">Manage menu items, events, and customer orders.</p>
       <label>Username<input name="username" autoComplete="username" required/></label>
-      <label>Password<input name="password" type="password" autoComplete="current-password" required/></label>
+      <label>
+        Password
+        <span className="password-field">
+          <input
+            name="password"
+            type={showPassword ? 'text' : 'password'}
+            autoComplete="current-password"
+            required
+          />
+          <button
+            type="button"
+            className="password-toggle"
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
+            aria-pressed={showPassword}
+            onClick={() => setShowPassword((current) => !current)}
+          >
+            {showPassword ? 'Hide' : 'Show'}
+          </button>
+        </span>
+      </label>
       <button className="primary-button" disabled={busy || !connected}>{busy ? 'Signing in…' : 'Sign in'}</button>
       <p className="form-message">{!connected ? 'VITE_CONVEX_URL is not configured.' : error}</p>
     </form>

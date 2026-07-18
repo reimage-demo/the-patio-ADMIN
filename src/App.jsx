@@ -179,6 +179,32 @@ export default function App() {
     await removeMenu({ sessionToken: token, id });
     notify("Menu item deleted");
   }
+  async function updateMenuVisibility(item, isAvailable) {
+    await updateMenu({
+      sessionToken: token,
+      id: item._id,
+      removeImage: false,
+      name: item.name,
+      category: item.category,
+      description: item.description,
+      price: item.price,
+      ...(item.accent ? { accent: item.accent } : {}),
+      ...(item.imageStorageId
+        ? { imageStorageId: item.imageStorageId }
+        : item.imageUrl
+          ? { imageUrl: item.imageUrl }
+          : {}),
+      isAvailable,
+      isFeatured: item.isFeatured ?? false,
+      isDrinkOfNight: item.isDrinkOfNight ?? false,
+      isCustomDrink: item.isCustomDrink ?? false,
+      isBottleService: item.isBottleService ?? false,
+      optionGroupIds: item.optionGroupIds || [],
+      sortOrder: item.sortOrder,
+      addOns: item.addOns || [],
+    });
+    notify(isAvailable ? "Item shown on customer menu" : "Item hidden from customer menu");
+  }
   async function saveEvent(data) {
     let { id, file, imageStorageId, imageUrl, removeImage, ...values } = data;
     if (file?.size) {
@@ -298,6 +324,7 @@ export default function App() {
                   })
                 }
                 onDelete={deleteMenu}
+                onVisibility={updateMenuVisibility}
               />
             )}
             {view === "bottle-service" && (
@@ -320,6 +347,7 @@ export default function App() {
                   })
                 }
                 onDelete={deleteMenu}
+                onVisibility={updateMenuVisibility}
               />
             )}
             {view === "pricing" && (

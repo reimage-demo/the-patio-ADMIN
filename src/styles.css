@@ -1350,6 +1350,36 @@ select {
   border-radius: 5px;
   font-size: 15px;
 }
+.password-field {
+  position: relative;
+  display: block;
+  margin-top: 7px;
+}
+.login-card .password-field input {
+  margin-top: 0;
+  padding-right: 70px;
+}
+.login-card .password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 7px;
+  min-width: 54px;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 5px;
+  color: var(--forest);
+  background: #eef3f2;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+.login-card .password-toggle:hover,
+.login-card .password-toggle:focus-visible {
+  background: #dfe9e5;
+}
 .login-card .primary-button {
   min-height: 48px;
   margin-top: 20px;
@@ -2338,7 +2368,7 @@ h3,
   }
 }
 
-/* Unified admin form controls — keep all editor fields on the same baseline. */
+/* Unified admin form controls: keep all editor fields on the same baseline. */
 :root {
   --admin-control-height: 48px;
   --admin-control-radius: 10px;

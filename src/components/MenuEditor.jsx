@@ -209,7 +209,7 @@ export default function MenuEditor({
                 </div>
                 <div className="menu-visibility-options visibility-cards">
                   <label className="switch-label">
-                    <span><strong>Available now</strong><small>Customers can order it</small></span>
+                    <span><strong>Show on customer menu</strong><small>Turn this off to keep the item in admin but hide it from customers</small></span>
                     <input type="checkbox" checked={available} onChange={(event) => setAvailable(event.target.checked)} />
                     <span className="switch" />
                   </label>

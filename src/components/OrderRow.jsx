@@ -16,9 +16,13 @@ const statuses = [
   "refunded",
 ];
 const statusLabel = (value) =>
-  value === "refunded" ? "refunded (after Clover)" : value.replace("-", " ");
+  value === "completed"
+    ? "picked up"
+    : value === "refunded"
+      ? "refunded (after Clover)"
+      : value.replace("-", " ");
 const itemLabel = (item) =>
-  `${item.quantity}× ${item.name}${item.selectedAddOns?.length ? ` — ${item.selectedAddOns.map((option) => option.name).join(", ")}` : ""}`;
+  `${item.quantity}× ${item.name}${item.selectedAddOns?.length ? `: ${item.selectedAddOns.map((option) => option.name).join(", ")}` : ""}`;
 export default function OrderRow({
   order,
   compact,
@@ -67,7 +71,7 @@ export default function OrderRow({
       </div>
       {compact ? (
         <div className="order-meta">
-          <strong>{order.status.replace("-", " ")}</strong>
+          <strong>{statusLabel(order.status)}</strong>
           <span>{order.paid ? "Paid" : "Not paid"}</span>
         </div>
       ) : (
@@ -95,12 +99,20 @@ export default function OrderRow({
             />{" "}
             Paid
           </label>
-          {!["completed", "cancelled", "refunded"].includes(order.status) && (
+          {["received", "in-progress"].includes(order.status) && (
+            <button
+              className="complete-order-button"
+              onClick={() => onStatus(order._id, "ready")}
+            >
+              Ready for pickup
+            </button>
+          )}
+          {order.status === "ready" && (
             <button
               className="complete-order-button"
               onClick={() => onStatus(order._id, "completed")}
             >
-              Mark complete
+              Picked up
             </button>
           )}
           <button

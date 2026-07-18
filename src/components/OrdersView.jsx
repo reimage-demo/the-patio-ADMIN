@@ -65,6 +65,8 @@ export default function OrdersView({
             >
               {value === "all"
                 ? "All orders"
+                : value === "completed"
+                  ? "Finished"
                 : value[0].toUpperCase() + value.slice(1)}
             </button>
           ))}
