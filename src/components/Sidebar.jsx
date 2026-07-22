@@ -7,6 +7,7 @@ const tabs = [
   ["menu", "Menu"],
   ["bottle-service", "Bottle Service"],
   ["pricing", "Pricing & Options"],
+  ["coupons", "Coupons"],
   ["events", "Events"],
 ];
 export default function Sidebar({

@@ -887,6 +887,144 @@ textarea:focus {
   }
 }
 
+.order-details-button {
+  color: var(--forest);
+  border-color: rgba(24, 107, 61, 0.32) !important;
+}
+.order-details-panel {
+  grid-column: 1 / -1;
+  padding: 18px;
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1fr 1fr;
+  gap: 18px;
+  border-top: 1px solid var(--line);
+  background: #f8faf7;
+  border-radius: 10px;
+}
+.order-details-panel > div,
+.order-detail-items > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.order-details-panel small {
+  margin-bottom: 3px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.order-details-panel span,
+.order-details-panel strong {
+  overflow-wrap: anywhere;
+  font-size: 11px;
+}
+.order-detail-items {
+  gap: 10px !important;
+}
+.coupon-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.coupon-card .admin-card-head {
+  align-items: start;
+}
+.coupon-card .coupon-status {
+  margin: 0 0 6px;
+  color: var(--green);
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+.coupon-card.unavailable .coupon-status {
+  color: var(--muted);
+}
+.coupon-value {
+  padding: 7px 9px;
+  border-radius: 999px;
+  color: var(--forest);
+  background: #edf7ef;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.coupon-editor {
+  width: min(540px, calc(100% - 28px));
+}
+.coupon-editor form {
+  display: grid;
+  gap: 16px;
+}
+.coupon-type-picker {
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  border: 0;
+}
+.coupon-type-picker legend {
+  grid-column: 1 / -1;
+  margin-bottom: 2px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.coupon-type-picker button {
+  min-height: 46px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #fff;
+  font-weight: 700;
+}
+.coupon-type-picker button.selected {
+  color: #fff;
+  border-color: var(--forest);
+  background: var(--forest);
+}
+.coupon-amount-input {
+  position: relative;
+}
+.coupon-amount-input > span {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  z-index: 1;
+  transform: translateY(-50%);
+  font-weight: 800;
+}
+.coupon-amount-input input {
+  padding-left: 34px !important;
+}
+.coupon-active-toggle {
+  min-height: 72px;
+  padding: 13px 14px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #fafbf9;
+}
+.coupon-active-toggle small,
+.coupon-active-toggle strong {
+  display: block;
+}
+.coupon-active-toggle small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+@media (max-width: 900px) {
+  .coupon-grid,
+  .order-details-panel {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .coupon-grid,
+  .order-details-panel {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Rent Me CT-style sidebar brand hierarchy */
 .sidebar {
   padding: 0 14px 22px;

@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 const moneyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
@@ -32,6 +34,7 @@ export default function OrderRow({
   selected,
   onSelect,
 }) {
+  const [showDetails, setShowDetails] = useState(false);
   return (
     <article className="order-row">
       <div className="order-person">
@@ -99,6 +102,13 @@ export default function OrderRow({
             />{" "}
             Paid
           </label>
+          <button
+            className="order-details-button"
+            onClick={() => setShowDetails((current) => !current)}
+            aria-expanded={showDetails}
+          >
+            {showDetails ? "Hide details" : "Details"}
+          </button>
           {["received", "in-progress"].includes(order.status) && (
             <button
               className="complete-order-button"
@@ -122,6 +132,52 @@ export default function OrderRow({
             Delete
           </button>
         </div>
+      )}
+      {!compact && showDetails && (
+        <section className="order-details-panel">
+          <div>
+            <small>Customer</small>
+            <strong>{order.customerName}</strong>
+            <span>{order.phone}</span>
+            {order.email && <span>{order.email}</span>}
+          </div>
+          <div className="order-detail-items">
+            <small>Order items</small>
+            {order.items.map((item, index) => (
+              <div key={`${item.menuItemId}-${index}`}>
+                <strong>
+                  {item.quantity}× {item.name}
+                </strong>
+                <span>{money(item.unitPrice)} each</span>
+                {item.selectedAddOns?.map((addOn, optionIndex) => (
+                  <span key={`${addOn.name}-${optionIndex}`}>
+                    + {addOn.name}{addOn.price ? ` (${money(addOn.price)})` : ""}
+                  </span>
+                ))}
+              </div>
+            ))}
+          </div>
+          <div>
+            <small>Payment</small>
+            <span>Subtotal: {money(order.subtotal)}</span>
+            {order.discount > 0 && (
+              <span>
+                Discount{order.couponCode ? ` (${order.couponCode})` : ""}: −
+                {money(order.discount)}
+              </span>
+            )}
+            {order.tip > 0 && <span>Tip: {money(order.tip)}</span>}
+            <strong>Total: {money(order.total)}</strong>
+            <span>{order.paid ? "Paid" : "Not paid"}</span>
+          </div>
+          <div>
+            <small>Notes</small>
+            <span>{order.notes || "No special notes"}</span>
+            {order.cloverPaymentId && (
+              <span>Clover payment: {order.cloverPaymentId}</span>
+            )}
+          </div>
+        </section>
       )}
     </article>
   );

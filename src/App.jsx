@@ -12,6 +12,8 @@ import MenuEditor from "./components/MenuEditor";
 import EventEditor from "./components/EventEditor";
 import PricingView from "./components/PricingView";
 import OptionGroupEditor from "./components/OptionGroupEditor";
+import CouponsView from "./components/CouponsView";
+import CouponEditor from "./components/CouponEditor";
 import { optimizeEventImage, optimizeMenuImage } from "./imageOptimizer";
 
 const api = anyApi;
@@ -28,6 +30,7 @@ export default function App() {
   const [menuEditor, setMenuEditor] = useState(null);
   const [eventEditor, setEventEditor] = useState(null);
   const [pricingEditor, setPricingEditor] = useState(null);
+  const [couponEditor, setCouponEditor] = useState(null);
   const [toast, setToast] = useState("");
 
   const overview = useQuery(
@@ -64,6 +67,11 @@ export default function App() {
   );
   const orders = orderPages.results || [];
   const events = eventPages.results || [];
+  const coupons =
+    useQuery(
+      api.coupons.adminList,
+      token && view === "coupons" ? { sessionToken: token } : "skip",
+    ) || [];
   const loginAdmin = useMutation(api.adminAuth.login);
   const logoutAdmin = useMutation(api.adminAuth.logout);
   const createMenu = useMutation(api.menuItems.create);
@@ -82,6 +90,9 @@ export default function App() {
   const createOptionGroup = useMutation(api.optionGroups.create);
   const updateOptionGroup = useMutation(api.optionGroups.update);
   const removeOptionGroup = useMutation(api.optionGroups.remove);
+  const createCoupon = useMutation(api.coupons.create);
+  const updateCoupon = useMutation(api.coupons.update);
+  const removeCoupon = useMutation(api.coupons.remove);
 
   const notify = (message) => {
     setToast(message);
@@ -252,6 +263,20 @@ export default function App() {
     await removeOptionGroup({ sessionToken: token, id });
     notify("Pricing group deleted");
   }
+  async function saveCoupon(data) {
+    const { id, ...values } = data;
+    const payload = { sessionToken: token, ...values };
+    if (id) await updateCoupon({ id, ...payload });
+    else await createCoupon(payload);
+    setCouponEditor(null);
+    notify("Coupon saved");
+  }
+  async function deleteCoupon(id) {
+    if (!confirm("Delete this coupon? Customers will no longer be able to use it."))
+      return;
+    await removeCoupon({ sessionToken: token, id });
+    notify("Coupon deleted");
+  }
   function toggleSidebarSize() {
     setSidebarCollapsed((current) => {
       const next = !current;
@@ -370,6 +395,14 @@ export default function App() {
                 onDelete={deleteOptionGroup}
               />
             )}
+            {view === "coupons" && (
+              <CouponsView
+                coupons={coupons}
+                onAdd={() => setCouponEditor({ mode: "new" })}
+                onEdit={setCouponEditor}
+                onDelete={deleteCoupon}
+              />
+            )}
             {view === "events" && (
               <EventsView
                 events={events}
@@ -416,6 +449,13 @@ export default function App() {
           count={optionGroups.length}
           onClose={() => setPricingEditor(null)}
           onSave={saveOptionGroup}
+        />
+      )}
+      {couponEditor && (
+        <CouponEditor
+          coupon={couponEditor.mode === "new" ? null : couponEditor}
+          onClose={() => setCouponEditor(null)}
+          onSave={saveCoupon}
         />
       )}
       <div className={`toast ${toast ? "show" : ""}`}>{toast}</div>
