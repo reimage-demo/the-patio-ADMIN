@@ -23,7 +23,7 @@ export default function Sidebar({
       <div className="sidebar-brand-block">
         <a
           className="admin-brand"
-          href="../index.html"
+          href="/index.html"
           aria-label="The Patio website"
         >
           <img src={logo} alt="The Patio" />
@@ -58,7 +58,7 @@ export default function Sidebar({
       </nav>
       <div className="sidebar-bottom">
         <a
-          href="../index.html"
+          href="/index.html"
           target="_blank"
           rel="noreferrer"
           title={collapsed ? "View website" : undefined}
